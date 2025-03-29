@@ -72,11 +72,11 @@ export class StreamDock {
     this.backend = backend;
   }
 
-  async receive() {
+  async receive(): Promise<Buffer> {
     return this.backend.receive();
   }
 
-  async send(data: Buffer | Array<number>, prefix = StreamDock.CMD_PREFIX) {
+  async send(data: Buffer | Array<number>, prefix = StreamDock.CMD_PREFIX): Promise<void> {
     await this.mutex.lock();
     if (!Buffer.isBuffer(data)) {
       data = Buffer.from(data);
@@ -91,7 +91,7 @@ export class StreamDock {
     this.mutex.unlock();
   }
 
-  async getFirmwareVersion() {
+  async getFirmwareVersion(): Promise<string | undefined> {
     const data = await this.backend.controlTransfer(0xa1, 0x01, 0x0100, 0, 512);
 
     if (!Buffer.isBuffer(data)) {
@@ -102,7 +102,7 @@ export class StreamDock {
     return data.toString("utf-8");
   }
 
-  async sendBytes(data: Buffer | Array<number>, chunkSize = StreamDock.packetSize) {
+  async sendBytes(data: Buffer | Array<number>, chunkSize = StreamDock.packetSize): Promise<void> {
     if (!Buffer.isBuffer(data)) {
       data = Buffer.from(data);
     }
@@ -118,30 +118,30 @@ export class StreamDock {
     }
   }
 
-  async wakeScreen() {
+  async wakeScreen(): Promise<void> {
     await this.send(StreamDock.CRT_DIS());
   }
 
-  async clearScreen() {
+  async clearScreen(): Promise<void> {
     await this.send(StreamDock.CRT_CLE(0xff));
   }
 
-  async refresh() {
+  async refresh(): Promise<void> {
     await this.send(StreamDock.CRT_STP());
   }
 
-  async setBrightness(value: number) {
+  async setBrightness(value: number): Promise<void> {
     await this.send(StreamDock.CRT_LIG(value));
   }
 
-  private getImageBuffer(image: string | Buffer) {
+  private getImageBuffer(image: string | Buffer): Buffer | Promise<Buffer> {
     if (typeof image === "string") {
       return readFile(image);
     }
     return image;
   }
 
-  async setKeyImage(key: number, image: string | Buffer) {
+  async setKeyImage(key: number, image: string | Buffer): Promise<void> {
     const imgBuffer = await this.getImageBuffer(image);
     const img = (await Jimp.fromBuffer(imgBuffer))
       .resize({
@@ -159,7 +159,7 @@ export class StreamDock {
     await this.refresh();
   }
 
-  async clearKeyImage(key: number) {
+  async clearKeyImage(key: number): Promise<void> {
     await this.send(StreamDock.CRT_CLE(key));
   }
 
@@ -172,7 +172,7 @@ export class StreamDock {
     };
   }
 
-  async setBootImage(image: string | Buffer) {
+  async setBootImage(image: string | Buffer): Promise<void> {
     const imgBuffer = await this.getImageBuffer(image);
     const img = (await Jimp.fromBuffer(imgBuffer))
       .resize({

@@ -1,11 +1,11 @@
-import path from "path";
+// import path from "path";
 import * as usb from "usb";
 import { StreamDock } from "./streamdock";
 
-const VID = 0x5500;
-const PID = 0x1001;
+const VID = 0x6602;
+const PID = 0x1000;
 
-const imagesPath = path.join(process.cwd(), "images");
+// const imagesPath = path.join(process.cwd(), "images");
 
 async function main() {
   const device = usb.findByIds(VID, PID);
@@ -48,6 +48,7 @@ async function main() {
             reject();
             return;
           }
+
           resolve();
         });
       });
@@ -78,11 +79,17 @@ async function main() {
     },
   });
 
-  console.log(await sd.getFirmwareVersion());
+  const version = await sd.getFirmwareVersion();
+  console.log(`Firmware version: ${version}`);
   await sd.wakeScreen();
-  await sd.clearScreen();
-  await sd.setBrightness(0x19);
-
+  console.log("screen awaken");
+  // await sd.clearScreen();
+  // const brightnesLevel = 0x64;
+  // await sd.setBrightness(0x64);
+  // console.log("brightness set to", brightnesLevel);
+  await sd.refresh();
+  console.log("screen refreshed");
+  /*
   // await sd.setBootImage(path.join(imagesPath, "logo.jpg"));
 
   const fillScreen = async () => {
@@ -92,11 +99,15 @@ async function main() {
   };
 
   await fillScreen();
+  */
+
+  sd.clearScreen();
+  console.log("screen cleared");
 
   while (true) {
     const { keyId, state } = await sd.receiveKeyPress();
     console.log("Key", keyId, "state", state);
-    await sd.setKeyImage(keyId, path.join(imagesPath, state ? "test2.png" : "test1.png"));
+    // await sd.setKeyImage(keyId, path.join(imagesPath, state ? "test2.png" : "test1.png"));
   }
 }
 
