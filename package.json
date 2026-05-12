@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "jimp": "^1.6.0",
+    "node-hid": "^3.3.0",
     "usb": "^2.14.0"
   },
   "prettier": {
